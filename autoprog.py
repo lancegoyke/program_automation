@@ -13,9 +13,10 @@ Future enhancements:
 
 from __future__ import print_function
 from collections import namedtuple
-from os import name
+from datetime import datetime
 import os.path
-from googleapiclient.discovery import build
+from googleapiclient.discovery import build, Resource
+from googleapiclient.errors import HttpError
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -27,7 +28,7 @@ SCOPES = [
 ]
 
 # You'll probably want to update this
-PROGRAM_NAME = "201"
+PROGRAM_NAME = "401"
 
 # These can probably stay the same
 DATA_SPREADSHEET_ID = "1tu0jNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ"
@@ -41,35 +42,39 @@ SPREADSHEET_ID = "1tu0jNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ"
 RANGE_NAME = "Client Spreadsheets!A2:B"
 
 
-def copy(source, destination):
-    """Copy one sheet to another
-    source_spreadsheet (required) - spreadsheet ID
-    source_sheet (required) - sheet name
-    Destination (required) - spreadsheet ID
+def copy(service: Resource, program_name: str, destination: str):
+    """
+    Copy one sheet to a different spreadsheet
+    `program_name: str` (required) - the program name
+    `destination: str` (required) - spreadsheet ID
     """
 
-    service = build("sheets", "v4", credentials=get_creds())
+    # service = build("sheets", "v4", credentials=get_creds())
 
-    result = (
+    data_programs_spreadsheet: dict = (
         service.spreadsheets()
         .values()
         .get(spreadsheetId=DATA_SPREADSHEET_ID, range=DATA_PROGRAMS_RANGE)
         .execute()
     )
-    values = result.get("values", [])
+    data_programs: list = data_programs_spreadsheet.get(
+        "values", []
+    )  # copy of spreadsheet values
 
-    for row in values:
-        if row[0] == source:
-            template_info = row
+    for row in data_programs:
+        if row[0] == program_name:  # the first cell contains program names
+            template_info: list[str] = row
 
-    source_spreadsheet = row[1]
-    source_sheet = row[2]
+    source_spreadsheet: str = template_info[1]
+    source_sheet: int = template_info[2]
 
-    copy_sheet_to_another_spreadsheet_request_body = {
+    copy_sheet_to_another_spreadsheet_request_body: dict = {
         "destination_spreadsheet_id": destination,
     }
 
     # Copy the sheet
+    # https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.sheets/copyTo
+    # https://googleapis.github.io/google-api-python-client/docs/dyn/sheets_v4.spreadsheets.sheets.html
     request = (
         service.spreadsheets()
         .sheets()
@@ -83,6 +88,7 @@ def copy(source, destination):
     destination_sheet = response.get("sheetId")
 
     # Rename the sheet
+    program_name_with_MM_YY = f"{program_name} - {datetime.now().strftime('%m/%y')}"
     batch_update_spreadsheet_request_body = {
         # A list of updates to apply to the spreadsheet.
         # Requests will be applied in the order they are specified.
@@ -92,27 +98,36 @@ def copy(source, destination):
                 "updateSheetProperties": {
                     "properties": {
                         "sheetId": destination_sheet,
-                        "title": source,
+                        "title": program_name_with_MM_YY,
                     },
                     "fields": "title",
                 }
             }
         ],
+        "includeSpreadsheetInResponse": True,
     }
-
     request = service.spreadsheets().batchUpdate(
         spreadsheetId=destination, body=batch_update_spreadsheet_request_body
     )
-    response = request.execute()
+    response: dict = request.execute()
 
-    print(f'SUCCESS: copied sheet "{source}"')
+    try:
+        print(
+            f'SUCCESS: copied "{program_name_with_MM_YY}" sheet to {response["updatedSpreadsheet"]["properties"]["title"]}'
+        )
+    except Exception as e:
+        print("There was an error printing the sheet properties")
+        print(e)
+        print(f'SUCCESS: copied sheet "{program_name_with_MM_YY}')
 
 
-def get_clients():
-    """Return as list of client names and their spreadsheet ID"""
+def get_clients(service: Resource):
+    """
+    Return a list of client names and their spreadsheet ID
+    """
     Client = namedtuple("Client", ["client_name", "spreadsheet_id"])
 
-    service = build("sheets", "v4", credentials=get_creds())
+    # service = build("sheets", "v4", credentials=get_creds())
 
     # get the IDs from my Data.Client Spreadsheets sheet
     result = (
@@ -133,6 +148,7 @@ def get_creds():
     # created automatically when the authorization flow completes for the first
     # time.
     if os.path.exists("token.json"):
+        print("Found 'token.json' file")
         creds = Credentials.from_authorized_user_file("token.json", SCOPES)
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
@@ -169,8 +185,9 @@ def print_test():
 
 def main():
 
-    for client in get_clients():
-        copy(PROGRAM_NAME, client.spreadsheet_id)
+    with build("sheets", "v4", credentials=get_creds()) as service:
+        for client in get_clients(service):
+            copy(service, PROGRAM_NAME, client.spreadsheet_id)
 
 
 if __name__ == "__main__":
