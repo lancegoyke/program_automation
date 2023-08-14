@@ -28,7 +28,7 @@ SCOPES = [
 ]
 
 # You'll probably want to update this
-PROGRAM_NAME = "401"
+PROGRAM_NAME = "602"
 
 # These can probably stay the same
 DATA_SPREADSHEET_ID = "1tu0jNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ"
@@ -184,7 +184,6 @@ def print_test():
 
 
 def main():
-
     with build("sheets", "v4", credentials=get_creds()) as service:
         for client in get_clients(service):
             copy(service, PROGRAM_NAME, client.spreadsheet_id)
