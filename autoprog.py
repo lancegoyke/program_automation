@@ -40,6 +40,8 @@ DATA_TEMPLATE_SHEET_ID = 1880812861
 DATA_CLIENT_SHEET_ID = 0
 DATA_PROGRAMS_RANGE = "Programs!A2:C"
 DATA_CLIENTS_RANGE = "Client Spreadsheets!A2:B"
+# uncomment the following line to use testing data
+# DATA_CLIENTS_RANGE = "TESTDATA Client Spreadsheets!A2:B"
 
 # This is for the `test_print()` function
 SPREADSHEET_ID = "1tu0jNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ"
@@ -160,7 +162,31 @@ def spreadsheets_sheets_copyto(
     )
 
 
-def copy(service: Resource, program_name: str, destination: str):
+def rename_sheet(service: Resource, spreadsheet_id: str, sheet_id: int, new_title: str):
+    batch_update_spreadsheet_request_body = {
+        "requests": [
+            {
+                "updateSheetProperties": {
+                    "properties": {
+                        "sheetId": sheet_id,
+                        "title": new_title,
+                    },
+                    "fields": "title",
+                }
+            }
+        ],
+        "includeSpreadsheetInResponse": True,
+    }
+    return (
+        service.spreadsheets()
+        .batchUpdate(
+            spreadsheetId=spreadsheet_id, body=batch_update_spreadsheet_request_body
+        )
+        .execute()
+    )
+
+
+def copy(service: Resource, program_name: str, destination_spreadsheet_id: str):
     """
     Copy one sheet to a different spreadsheet
     `program_name: str` (required) - the program name
@@ -178,36 +204,20 @@ def copy(service: Resource, program_name: str, destination: str):
     source_sheet: int = template_info[2]
 
     destination_sheet = spreadsheets_sheets_copyto(
-        service, source_spreadsheet, source_sheet, destination
+        service, source_spreadsheet, source_sheet, destination_spreadsheet_id
     ).get("sheetId")
 
     # Rename the sheet
-    program_name_with_MM_YY = f"{program_name} - {datetime.now().strftime('%m/%y')}"
-    batch_update_spreadsheet_request_body = {
-        # A list of updates to apply to the spreadsheet.
-        # Requests will be applied in the order they are specified.
-        # If any request is not valid, no requests will be applied.
-        "requests": [
-            {
-                "updateSheetProperties": {
-                    "properties": {
-                        "sheetId": destination_sheet,
-                        "title": program_name_with_MM_YY,
-                    },
-                    "fields": "title",
-                }
-            }
-        ],
-        "includeSpreadsheetInResponse": True,
-    }
-    request = service.spreadsheets().batchUpdate(
-        spreadsheetId=destination, body=batch_update_spreadsheet_request_body
+    new_title = program_name_with_MM_YY = (
+        f"{program_name} - {datetime.now().strftime('%m/%y')}"
     )
-    response: dict = request.execute()
+    updated_spreadsheet = rename_sheet(
+        service, destination_spreadsheet_id, destination_sheet, new_title
+    ).get("updatedSpreadsheet")
 
     try:
         print(
-            f'SUCCESS: copied "{program_name_with_MM_YY}" sheet to {response["updatedSpreadsheet"]["properties"]["title"]}'
+            f'SUCCESS: copied "{program_name_with_MM_YY}" sheet to {updated_spreadsheet["properties"]["title"]}'
         )
     except Exception as e:
         print("There was an error printing the sheet properties")
