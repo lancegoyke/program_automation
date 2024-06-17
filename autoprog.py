@@ -292,13 +292,11 @@ def print_test():
     result = (
         sheet.values().get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
     )
-    values = result.get("values", [])
-
-    if not values:
-        print("No data found.")
-    else:
+    if values := result.get("values", []):
         client_sheets = [row[1] for row in values]
         print(client_sheets)
+    else:
+        print("No data found.")
 
 
 def main():
