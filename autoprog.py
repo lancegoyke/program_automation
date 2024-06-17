@@ -42,7 +42,26 @@ SPREADSHEET_ID = "1tu0jNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ"
 RANGE_NAME = "Client Spreadsheets!A2:B"
 
 
-def get_template_programs(service: Resource) -> list[list[str, str, str]]:
+def get_template_programs(service: Resource) -> list[list[str]]:
+    """
+    Fetches a spreadsheet full of template programs worth copying.
+
+    Args:
+        service (Resource): The Google API service object.
+
+    Returns:
+        List[List[str]]: A list of lists containing the template programs.
+
+    Example:
+        [
+          # Program Name  Spreadsheet ID                                 Sheet ID
+            ['201',      'testjNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ', 1111812861],
+            ['202',      'testjNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ', 1111812861],
+            ['203',      'testjNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ', 1111812861],
+            ['204',      'testjNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ', 1111812861],
+            # ...
+        ]
+    """
     return (
         service.spreadsheets()
         .values()
