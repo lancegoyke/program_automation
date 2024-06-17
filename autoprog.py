@@ -59,10 +59,10 @@ def get_template_programs(service: Resource) -> list[list[str]]:
     Example:
         [
           # Program Name  Spreadsheet ID                                 Sheet ID
-            ['201',      'testjNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ', 1111812861],
-            ['202',      'testjNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ', 1111812861],
-            ['203',      'testjNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ', 1111812861],
-            ['204',      'testjNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ', 1111812861],
+            ["201",      "testjNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ", "1111812861"],
+            ["202",      "testjNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ", "1111812861"],
+            ["203",      "testjNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ", "1111812861"],
+            ["204",      "testjNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ", "1111812861"],
             # ...
         ]
     """
@@ -82,6 +82,7 @@ def copy(service: Resource, program_name: str, destination: str):
     `destination: str` (required) - spreadsheet ID
     """
 
+    # Get the template programs
     data_programs = get_template_programs(service)
 
     for row in data_programs:
