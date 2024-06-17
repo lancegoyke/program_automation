@@ -4,6 +4,10 @@ client spreadsheets.
 
 Usage: change constants according to what is desired, then run
 
+TODO:
+- [x] get_template_programs()
+- [ ] run with test flag
+
 Future enhancements:
 * Hide the old program (store last added sheet, lookup, then hide)
 * CLI with multiple actions:
