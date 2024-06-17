@@ -203,9 +203,14 @@ def copy(service: Resource, program_name: str, destination_spreadsheet_id: str):
     source_spreadsheet: str = template_info[1]
     source_sheet: int = template_info[2]
 
-    destination_sheet = spreadsheets_sheets_copyto(
-        service, source_spreadsheet, source_sheet, destination_spreadsheet_id
-    ).get("sheetId")
+    try:
+        destination_sheet = spreadsheets_sheets_copyto(
+            service, source_spreadsheet, source_sheet, destination_spreadsheet_id
+        ).get("sheetId")
+    except HttpError as e:
+        print(f"ERROR {e.status_code}: {e.reason}")
+        print(f'ERROR: could not copy "{program_name}" to {destination_spreadsheet_id}')
+        return
 
     # Rename the sheet
     new_title = f"{program_name} - {datetime.now().strftime('%m/%y')}"
