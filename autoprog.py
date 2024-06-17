@@ -208,21 +208,24 @@ def copy(service: Resource, program_name: str, destination_spreadsheet_id: str):
     ).get("sheetId")
 
     # Rename the sheet
-    new_title = program_name_with_MM_YY = (
-        f"{program_name} - {datetime.now().strftime('%m/%y')}"
-    )
-    updated_spreadsheet = rename_sheet(
-        service, destination_spreadsheet_id, destination_sheet, new_title
-    ).get("updatedSpreadsheet")
+    new_title = f"{program_name} - {datetime.now().strftime('%m/%y')}"
+    try:
+        updated_spreadsheet = rename_sheet(
+            service, destination_spreadsheet_id, destination_sheet, new_title
+        ).get("updatedSpreadsheet")
+    except HttpError as e:
+        print(f"ERROR {e.status_code}: {e.reason}")
+        print(f'ERROR: could not copy sheet "{new_title}"')
+        return
 
     try:
         print(
-            f'SUCCESS: copied "{program_name_with_MM_YY}" sheet to {updated_spreadsheet["properties"]["title"]}'
+            f'SUCCESS: copied "{new_title}" sheet to {updated_spreadsheet["properties"]["title"]}'
         )
     except Exception as e:
         print("There was an error printing the sheet properties")
         print(e)
-        print(f'SUCCESS: copied sheet "{program_name_with_MM_YY}')
+        print(f'SUCCESS: copied sheet "{new_title}')
 
 
 def get_clients(service: Resource):
