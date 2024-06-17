@@ -238,13 +238,14 @@ def copy(service: Resource, program_name: str, destination_spreadsheet_id: str):
         print(f'SUCCESS: copied sheet "{new_title}')
 
 
-def get_clients(service: Resource):
+def get_clients(service: Resource) -> list[namedtuple]:
     """
     Return a list of client names and their spreadsheet ID
+
+    Args:
+        service (Resource): The Google API service object.
     """
     Client = namedtuple("Client", ["client_name", "spreadsheet_id"])
-
-    # service = build("sheets", "v4", credentials=get_creds())
 
     # get the IDs from my Data.Client Spreadsheets sheet
     result = (
