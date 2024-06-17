@@ -4,15 +4,12 @@ client spreadsheets.
 
 Usage: change constants according to what is desired, then run
 
-TODO:
-- [x] get_template_programs()
-- [ ] run with test flag
-
 Future enhancements:
 * Hide the old program (store last added sheet, lookup, then hide)
 * CLI with multiple actions:
     * Copy new program to all active clients
     * Copy base sheet for new client
+    * Dry run or test mode
 """
 
 from __future__ import print_function
@@ -39,9 +36,9 @@ DATA_SPREADSHEET_ID = "1tu0jNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ"
 DATA_TEMPLATE_SHEET_ID = 1880812861
 DATA_CLIENT_SHEET_ID = 0
 DATA_PROGRAMS_RANGE = "Programs!A2:C"
-# DATA_CLIENTS_RANGE = "Client Spreadsheets!A2:B"
+DATA_CLIENTS_RANGE = "Client Spreadsheets!A2:B"
 # uncomment the following line to use testing data
-DATA_CLIENTS_RANGE = "TESTDATA Client Spreadsheets!A2:B"
+# DATA_CLIENTS_RANGE = "TESTDATA Client Spreadsheets!A2:B"
 
 # This is for the `test_print()` function
 SPREADSHEET_ID = "1tu0jNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ"
