@@ -28,7 +28,7 @@ SCOPES = [
 ]
 
 # You'll probably want to update this
-PROGRAM_NAME = "602"
+PROGRAM_NAME = "202"
 
 # These can probably stay the same
 DATA_SPREADSHEET_ID = "1tu0jNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ"
@@ -42,6 +42,16 @@ SPREADSHEET_ID = "1tu0jNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ"
 RANGE_NAME = "Client Spreadsheets!A2:B"
 
 
+def get_template_programs(service: Resource) -> list[list[str, str, str]]:
+    return (
+        service.spreadsheets()
+        .values()
+        .get(spreadsheetId=DATA_SPREADSHEET_ID, range=DATA_PROGRAMS_RANGE)
+        .execute()
+        .get("values", [])
+    )
+
+
 def copy(service: Resource, program_name: str, destination: str):
     """
     Copy one sheet to a different spreadsheet
@@ -49,21 +59,11 @@ def copy(service: Resource, program_name: str, destination: str):
     `destination: str` (required) - spreadsheet ID
     """
 
-    # service = build("sheets", "v4", credentials=get_creds())
-
-    data_programs_spreadsheet: dict = (
-        service.spreadsheets()
-        .values()
-        .get(spreadsheetId=DATA_SPREADSHEET_ID, range=DATA_PROGRAMS_RANGE)
-        .execute()
-    )
-    data_programs: list = data_programs_spreadsheet.get(
-        "values", []
-    )  # copy of spreadsheet values
+    data_programs = get_template_programs(service)
 
     for row in data_programs:
-        if row[0] == program_name:  # the first cell contains program names
-            template_info: list[str] = row
+        if row[0] == program_name:
+            template_info = row
 
     source_spreadsheet: str = template_info[1]
     source_sheet: int = template_info[2]
