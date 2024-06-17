@@ -32,16 +32,16 @@ SCOPES = [
 ]
 
 # You'll probably want to update this
-PROGRAM_NAME = "202"
+PROGRAM_NAME = "203"
 
 # These can probably stay the same
 DATA_SPREADSHEET_ID = "1tu0jNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ"
 DATA_TEMPLATE_SHEET_ID = 1880812861
 DATA_CLIENT_SHEET_ID = 0
 DATA_PROGRAMS_RANGE = "Programs!A2:C"
-DATA_CLIENTS_RANGE = "Client Spreadsheets!A2:B"
+# DATA_CLIENTS_RANGE = "Client Spreadsheets!A2:B"
 # uncomment the following line to use testing data
-# DATA_CLIENTS_RANGE = "TESTDATA Client Spreadsheets!A2:B"
+DATA_CLIENTS_RANGE = "TESTDATA Client Spreadsheets!A2:B"
 
 # This is for the `test_print()` function
 SPREADSHEET_ID = "1tu0jNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ"
