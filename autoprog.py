@@ -189,8 +189,11 @@ def rename_sheet(service: Resource, spreadsheet_id: str, sheet_id: int, new_titl
 def copy(service: Resource, program_name: str, destination_spreadsheet_id: str):
     """
     Copy one sheet to a different spreadsheet
-    `program_name: str` (required) - the program name
-    `destination: str` (required) - spreadsheet ID
+
+    Args:
+        service (Resource): The Google API service object.
+        program_name (str): The name of the program.
+        destination_spreadsheet_id (str): The destination spreadsheet ID.
     """
 
     # Get the template programs
