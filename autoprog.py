@@ -216,12 +216,15 @@ def copy(service: Resource, program_name: str, destination_spreadsheet_id: str):
     source_spreadsheet: str = template_info[1]
     source_sheet: int = template_info[2]
 
-    try:
-        destination_sheet = spreadsheets_sheets_copyto(
+    # Copy the sheet
+    def copy_sheet_with_retry():
+        return spreadsheets_sheets_copyto(
             service, source_spreadsheet, source_sheet, destination_spreadsheet_id
         ).get("sheetId")
-    except HttpError as e:
-        print(f"ERROR {e.status_code}: {e.reason}")
+
+    destination_sheet = retry_operation(copy_sheet_with_retry, retries=3, delay=2)
+
+    if not destination_sheet:
         print(f'ERROR: could not copy "{program_name}" to {destination_spreadsheet_id}')
         return
 
