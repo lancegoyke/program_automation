@@ -22,6 +22,9 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
+from helpers import retry_operation
+
+
 # If modifying these scopes, delete the file token.json
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets.readonly",
@@ -201,9 +204,14 @@ def copy(service: Resource, program_name: str, destination_spreadsheet_id: str):
         print("ERROR: could not get template programs")
         return
 
+    template_info = None
     for row in data_programs:
         if row[0] == program_name:
             template_info = row
+
+    if not template_info:
+        print(f"ERROR: could not find template for {program_name}")
+        return
 
     source_spreadsheet: str = template_info[1]
     source_sheet: int = template_info[2]
@@ -219,23 +227,20 @@ def copy(service: Resource, program_name: str, destination_spreadsheet_id: str):
 
     # Rename the sheet
     new_title = f"{program_name} - {datetime.now().strftime('%m/%y')}"
-    try:
-        updated_spreadsheet = rename_sheet(
+
+    def rename_sheet_with_retry():
+        return rename_sheet(
             service, destination_spreadsheet_id, destination_sheet, new_title
         ).get("updatedSpreadsheet")
-    except HttpError as e:
-        print(f"ERROR {e.status_code}: {e.reason}")
-        print(f'ERROR: could not copy sheet "{new_title}"')
-        return
 
-    try:
+    updated_spreadsheet = retry_operation(rename_sheet_with_retry, retries=3, delay=2)
+
+    if updated_spreadsheet:
         print(
             f'SUCCESS: copied "{new_title}" sheet to {updated_spreadsheet["properties"]["title"]}'
         )
-    except Exception as e:
-        print("There was an error printing the sheet properties")
-        print(e)
-        print(f'SUCCESS: copied sheet "{new_title}')
+    else:
+        print(f'ERROR: failed to copy and rename sheet "{new_title}"')
 
 
 def get_clients(service: Resource) -> list[namedtuple]:
