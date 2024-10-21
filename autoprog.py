@@ -200,14 +200,14 @@ def copy(service: Resource, program_name: str, destination_spreadsheet_id: str):
     try:
         data_programs = get_template_programs(service)
     except HttpError as e:
-        print(f"ERROR {e.status_code}: {e.reason}")
-        print("ERROR: could not get template programs")
+        print(f"ERROR: could not get template programs: {e.status_code}: {e.reason}")
         return
 
     template_info = None
     for row in data_programs:
         if row[0] == program_name:
             template_info = row
+            break
 
     if not template_info:
         print(f"ERROR: could not find template for {program_name}")
