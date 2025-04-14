@@ -32,7 +32,7 @@ SCOPES = [
 ]
 
 # You'll probably want to update this
-PROGRAM_NAME = "105"
+PROGRAM_NAME = "106"
 
 # These can probably stay the same
 DATA_SPREADSHEET_ID = "1tu0jNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ"
