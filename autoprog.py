@@ -163,6 +163,26 @@ def spreadsheets_sheets_copyto(
 
 
 def rename_sheet(service: Resource, spreadsheet_id: str, sheet_id: int, new_title: str):
+    """
+    Renames a sheet, handling duplicate names by appending a number.
+
+    Args:
+        service (Resource): The Google API service object.
+        spreadsheet_id (str): The spreadsheet ID.
+        sheet_id (int): The sheet ID to rename.
+        new_title (str): The desired new title for the sheet.
+    """
+    # Get all sheets in the spreadsheet to check for duplicates
+    spreadsheet = service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+    existing_titles = {sheet["properties"]["title"] for sheet in spreadsheet["sheets"]}
+
+    # If the title already exists, append a number
+    base_title = new_title
+    counter = 1
+    while new_title in existing_titles:
+        new_title = f"{base_title} ({counter})"
+        counter += 1
+
     batch_update_spreadsheet_request_body = {
         "requests": [
             {
