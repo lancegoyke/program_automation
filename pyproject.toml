@@ -1,0 +1,11 @@
+[project]
+name = "program-automation"
+version = "0.1.0"
+description = "Copies training programs into multiple clients' Google Sheets each month."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "google-api-python-client",
+    "google-auth-httplib2",
+    "google-auth-oauthlib",
+]
