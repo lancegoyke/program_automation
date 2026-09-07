@@ -12,8 +12,6 @@ Future enhancements:
     * Dry run or test mode
 """
 
-from __future__ import print_function
-
 import os.path
 from collections import namedtuple
 from datetime import datetime
@@ -33,7 +31,7 @@ SCOPES = [
 ]
 
 # You'll probably want to update this
-PROGRAM_NAME = "314G"
+PROGRAM_NAME = "315G"
 
 # These can probably stay the same
 DATA_SPREADSHEET_ID = "1tu0jNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ"
