@@ -9,10 +9,10 @@ Future enhancements:
 * CLI with multiple actions:
     * Copy new program to all active clients
     * Copy base sheet for new client
-    * Dry run or test mode
 """
 
 import os.path
+import sys
 from collections import namedtuple
 from datetime import datetime
 
@@ -41,10 +41,6 @@ DATA_PROGRAMS_RANGE = "Programs!A2:C"
 DATA_CLIENTS_RANGE = "Client Spreadsheets!A2:B"
 # uncomment the following line to use testing data
 # DATA_CLIENTS_RANGE = "TESTDATA Client Spreadsheets!A2:B"
-
-# This is for the `test_print()` function
-SPREADSHEET_ID = "1tu0jNOpXEqCeEN4UKvk_Av5DE46CPNCjXBjDYZ6jhHQ"
-RANGE_NAME = "Client Spreadsheets!A2:B"
 
 
 def get_template_programs(service: Resource) -> list[list[str]]:
@@ -308,22 +304,34 @@ def get_creds():
     return creds
 
 
-def print_test():
-    """Shows basic usage of the Sheets API.
-    Prints values from a sample spreadsheet.
-    """
-    service = build("sheets", "v4", credentials=get_creds())
+def check():
+    """Confirm Google access and preview the monthly run without copying anything.
 
-    # Call the Sheets API
-    sheet = service.spreadsheets()
-    result = (
-        sheet.values().get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
-    )
-    if values := result.get("values", []):
-        client_sheets = [row[1] for row in values]
-        print(client_sheets)
-    else:
-        print("No data found.")
+    Reads the data spreadsheet and opens each client spreadsheet's title.
+    Everything is read-only, so it's safe to run any time.
+    """
+    with build("sheets", "v4", credentials=get_creds()) as service:
+        program_names = [row[0] for row in get_template_programs(service) if row]
+        if PROGRAM_NAME in program_names:
+            print(f'OK: program "{PROGRAM_NAME}" found in the Programs sheet')
+        else:
+            print(f'ERROR: program "{PROGRAM_NAME}" not found in the Programs sheet')
+
+        clients = get_clients(service)
+        print(f"Checking access to {len(clients)} client spreadsheets...")
+        failures = 0
+        for client in clients:
+            try:
+                title = (
+                    service.spreadsheets()
+                    .get(spreadsheetId=client.spreadsheet_id, fields="properties.title")
+                    .execute()["properties"]["title"]
+                )
+                print(f"  OK: {client.client_name} -> {title}")
+            except HttpError as error:
+                failures += 1
+                print(f"  ERROR: {client.client_name}: {error.status_code} {error.reason}")
+        print(f"Done: {len(clients) - failures} OK, {failures} failed. Nothing was copied.")
 
 
 def main():
@@ -333,4 +341,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if "--check" in sys.argv[1:]:
+        check()
+    else:
+        main()
